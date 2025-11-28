@@ -1,34 +1,117 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
   <meta charset="utf-8">
-  <title>Redirecting...</title>
-  <meta http-equiv="refresh" content="0;url=https://play.google.com/store/apps/details?id=com.gogobag.android&pcampaignid=web_share">
+  <title>Открываем GoGoBag…</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- 1. Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XFYPYZT9ME"></script>
   <script>
-    // Сразу определяем и меняем редирект (работает до отрисовки страницы)
-    (function(){
-      const u = navigator.userAgent;
-      const p = navigator.platform;
-      const ios = /iPhone|iPad|iPod|MacIntel.+Touch/.test(u) || (p==='MacIntel' && 'ontouchend' in document);
-      const android = /Android/.test(u);
-      const mac = /Macintosh|MacIntel|MacPPC|Mac68K/.test(p) && !ios;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XFYPYZT9ME', { send_page_view: false });
+  </script>
 
-      const appStore = 'https://apps.apple.com/us/app/gogobag-доставка-попутниками/id6740579444';
-      const playStore = 'https://play.google.com/store/apps/details?id=com.gogobag.android&pcampaignid=web_share';
-      const nativeiOS = 'itms-apps://apps.apple.com/us/app/id6740579444';
-      const nativeAndroid = 'market://details?id=com.gogobag.android';
+  <!-- 2. Meta Pixel (Facebook + Instagram) — замени 1234567890 на свой! -->
+  <script>
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1234567890'); // ←←←←← СЮДА СВОЙ PIXEL ID
+    fbq('track', 'Lead');
+  </script>
 
-      let url;
-      if (ios) url = nativeiOS;
-      else if (android) url = nativeAndroid;
-      else if (mac) url = appStore;
-      else url = playStore;
+  <!-- 3. TikTok Pixel — замени TTTTTTTTTT на свой! -->
+  <script>
+    !function (w, d, t) {
+      w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods="page track identify instances debug on ready".split(" ");
+      ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};
+      for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)
+      ttq.setAndDefer(e,ttq.methods[n]);return e};ttq.load=function(e,n){var i="https://analytics.tiktok.com/i18n/pixel/events.js";
+      ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=i,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};
+      var o=document.createElement("script");o.type="text/javascript",o.async=!0,o.src=i+"?sdkid="+e+"&lib="+t;
+      var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(o,a)};
+      ttq.load('TTTTTTTTTT'); // ←←←←← СЮДА СВОЙ TikTok Pixel ID
+      ttq.page();
+      ttq.track('Click');
+    }(window, document, 'ttq');
+  </script>
 
-      // Два способа — один точно сработает мгновенно
-      document.querySelector('meta[http-equiv="refresh"]').setAttribute('content', '0;url='+url);
-      location.replace(url); // самый быстрый и не оставляет записи в истории
+  <!-- 4. Главный редирект-скрипт (всё остальное) -->
+  <script>
+    (function () {
+      const params = new URLSearchParams(location.search);
+      const hash = location.hash;
+      const fullQuery = location.search + hash;
+      
+      // Защита от обрезания параметров Facebook/Instagram
+      if (params.has('fbclid')) {
+        params.set('fb_click_id', params.get('fbclid'));
+      }
+
+      const queryString = params.toString() ? '?' + params.toString() : '';
+
+      // Базовые ссылки (все параметры автоматически прицепятся)
+      const appStore     = 'https://apps.apple.com/app/id6740579444' + fullQuery;
+      const playStore    = 'https://play.google.com/store/apps/details?id=com.gogobag.android' + fullQuery;
+      const nativeiOS    = 'gogobag://' + fullQuery.replace('?', ''); // твой custom scheme (если есть)
+      const nativeAndroid= 'intent://details?id=com.gogobag.android#Intent;scheme=market;package=com.android.vending;end';
+
+      const ua = navigator.userAgent;
+      const ios = /iPhone|iPad|iPod|iPhone OS/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const android = /Android/.test(ua);
+
+      let finalUrl;
+
+      // 1. Если приложение установлено — пытаемся открыть сразу
+      if (ios) {
+        finalUrl = nativeiOS;                    // твой scheme или itms-apps:// (ниже fallback)
+      } else if (android) {
+        finalUrl = 'market://details?id=com.gogobag.android' + fullQuery;
+      } else {
+        finalUrl = playStore;
+      }
+
+      // Отправляем события во все системы
+      gtag('event', 'smartlink_click', {
+        platform: ios ? 'ios' : android ? 'android' : 'desktop',
+        source: params.get('utm_source') || 'direct',
+        medium: params.get('utm_medium') || null,
+        campaign: params.get('utm_campaign') || null
+      });
+
+      // Резервный редирект через 1200 мс (если приложение не установлено)
+      let redirected = false;
+      function fallback() {
+        if (!redirected) {
+          redirected = true;
+          window.location = ios ? appStore : playStore;
+        }
+      }
+      setTimeout(fallback, 1200);
+
+      // Основной мгновенный редирект
+      if (ios && navigator.standalone !== undefined) {
+        // iOS: пробуем custom scheme → если не открылось, через 1.2 сек уйдём в App Store
+        window.location = nativeiOS || 'itms-apps://apps.apple.com/app/id6740579444';
+      } else {
+        redirected = true;
+        document.write(''); // очищаем тело
+        window.location.replace(finalUrl);
+      }
     })();
   </script>
+
+  <!-- 5. Носкрипт-фолбэк (если JS полностью выключен) -->
+  <noscript>
+    <meta http-equiv="refresh" content="0;url=https://play.google.com/store/apps/details?id=com.gogobag.android?utm_source=direct&utm_medium=noscript">
+  </noscript>
 </head>
-<body></body>
+<body>
+  <!-- Пользователь ничего не увидит — редирект мгновенный -->
+</body>
 </html>
