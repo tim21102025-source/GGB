@@ -2,8 +2,9 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8">
-  <title>Открываем GoGoBag…</title>
+  <title>GoGoBag — Доступно в App Store и Google Play</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Скачай GoGoBag для доставки попутниками. Автоматический редирект для мобильных устройств.">
 
   <!-- Google Analytics 4 -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-XFYPYZT9ME"></script>
@@ -11,61 +12,53 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-XFYPYZT9ME', { send_page_view: false });
+    gtag('config', 'G-XFYPYZT9ME', { send_page_view: true });
   </script>
 
   <script>
     (function () {
-      console.log('Smartlink started'); // Лог для теста
+      console.log('Desktop landing started (via OneLink.to)');
 
       const params = new URLSearchParams(location.search);
       const hash = location.hash;
-      const fullQuery = location.search + hash;
 
-      // Защита fbclid
+      // Защита fbclid (если OneLink.to передал)
       if (params.has('fbclid')) {
         params.set('fb_click_id', params.get('fbclid'));
+        params.delete('fbclid');
       }
-      const queryString = params.toString() ? '?' + params.toString() : '';
 
-      console.log('Query string:', queryString); // Лог параметров
-
-      // Базовые ссылки
-      const appStore = 'https://apps.apple.com/app/id6740579444' + fullQuery;
-      const playStore = 'https://play.google.com/store/apps/details?id=com.gogobag.android' + queryString;
-
-      // Точная проверка платформы
-      const ua = navigator.userAgent.toLowerCase();
-      const isIOS = /iphone|ipad|ipod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      const isAndroid = /android/.test(ua) && !/linux; android/.test(ua); // Исключаем Chrome OS
-
-      console.log('Detected platform:', isIOS ? 'iOS' : isAndroid ? 'Android' : 'Desktop'); // Лог платформы
-
-      let finalUrl = isIOS ? appStore : playStore;
-
-      // Событие в GA4
-      gtag('event', 'smartlink_click', {
-        platform: isIOS ? 'ios' : isAndroid ? 'android' : 'desktop',
+      // Событие в GA4 — фиксируем десктоп-клик с параметрами из OneLink
+      gtag('event', 'desktop_landing', {
+        platform: 'desktop',
         utm_source: params.get('utm_source') || 'direct',
         utm_medium: params.get('utm_medium') || null,
         utm_campaign: params.get('utm_campaign') || null,
         utm_term: params.get('utm_term') || null,
-        utm_content: params.get('utm_content') || null
+        utm_content: params.get('utm_content') || null,
+        from_onelink: true  // Флаг, что пришёл из OneLink.to
       });
 
-      console.log('Redirecting to:', finalUrl); // Лог финальной ссылки
-
-      // Мгновенный редирект без replace (более надёжно для мобильных)
-      window.location.href = finalUrl;
+      console.log('Parameters received:', params.toString());
+      console.log('Event sent to GA4');
     })();
   </script>
-
-  <!-- Noscript fallback -->
-  <noscript>
-    <meta http-equiv="refresh" content="0;url=https://play.google.com/store/apps/details?id=com.gogobag.android">
-  </noscript>
 </head>
-<body>
-  <!-- Пусто для мгновенного редиректа -->
+<body style="font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f5f5f5;">
+  <h1>GoGoBag — Доставка попутниками</h1>
+  <p>Доступно только в мобильных приложениях. Если ты на компьютере, скачай app на телефон:</p>
+  
+  <div style="margin: 20px 0;">
+    <a href="https://play.google.com/store/apps/details?id=com.gogobag.android" 
+       style="display: inline-block; background: #4CAF50; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; margin: 10px; font-size: 18px;">
+      📱 Android (Google Play)
+    </a>
+    <a href="https://apps.apple.com/app/id6740579444" 
+       style="display: inline-block; background: #007AFF; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; margin: 10px; font-size: 18px;">
+      🍎 iOS (App Store)
+    </a>
+  </div>
+  
+  <p style="font-size: 14px; color: #666;">Все параметры из твоей ссылки сохранены и переданы в аналитику.</p>
 </body>
 </html>
