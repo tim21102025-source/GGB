@@ -1,66 +1,34 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GoGoBag — установка приложения</title>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; text-align: center; padding: 50px; background: #f9f9f9; }
-    .loader { margin: 20px auto; border: 4px solid #f3f3f3; border-top: 4px solid #007AFF; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-  </style>
-</head>
-<body>
-  <h2>Определяем вашу платформу…</h2>
-  <div class="loader"></div>
-  <p>Подождите пару секунд, мы перенаправляем вас в нужный магазин</p>
-
+  <meta charset="utf-8">
+  <title>Redirecting...</title>
+  <meta http-equiv="refresh" content="0;url=https://play.google.com/store/apps/details?id=com.gogobag.android&pcampaignid=web_share">
   <script>
-    (function () {
-      const ua = navigator.userAgent || navigator.vendor || window.opera;
-      const platform = navigator.platform || '';
-      const isIOS = /iPad|iPhone|iPod/.test(ua) || 
-                    (navigator.platform === 'MacIntel' && 'ontouchend' in document); // iPad с iPadOS
-      const isAndroid = /Android/.test(ua);
-      const isMacOS = /Macintosh|MacIntel|MacPPC|Mac68K/.test(platform) && !isIOS;
+    // Сразу определяем и меняем редирект (работает до отрисовки страницы)
+    (function(){
+      const u = navigator.userAgent;
+      const p = navigator.platform;
+      const ios = /iPhone|iPad|iPod|MacIntel.+Touch/.test(u) || (p==='MacIntel' && 'ontouchend' in document);
+      const android = /Android/.test(u);
+      const mac = /Macintosh|MacIntel|MacPPC|Mac68K/.test(p) && !ios;
 
-      // Ваши ссылки
-      const appStoreLink = 'https://apps.apple.com/us/app/gogobag-%D0%B4%D0%BE%D1%81%D1%82%D0%B0%D0%B2%D0%BA%D0%B0-%D0%BF%D0%BE%D0%BF%D1%83%D1%82%D0%BD%D0%B8%D0%BA%D0%B0%D0%BC%D0%B8/id6740579444';
-      const playStoreLink = 'https://play.google.com/store/apps/details?id=com.gogobag.android&pcampaignid=web_share';
+      const appStore = 'https://apps.apple.com/us/app/gogobag-доставка-попутниками/id6740579444';
+      const playStore = 'https://play.google.com/store/apps/details?id=com.gogobag.android&pcampaignid=web_share';
+      const nativeiOS = 'itms-apps://apps.apple.com/us/app/id6740579444';
+      const nativeAndroid = 'market://details?id=com.gogobag.android';
 
-      let redirectTo;
+      let url;
+      if (ios) url = nativeiOS;
+      else if (android) url = nativeAndroid;
+      else if (mac) url = appStore;
+      else url = playStore;
 
-      if (isIOS) {
-        // 1. iPhone / iPad → App Store (нативный)
-        redirectTo = 'itms-apps://apps.apple.com/us/app/id6740579444'; // лучше открывать нативно
-      } 
-      else if (isAndroid) {
-        // 2. Android → Google Play (нативный)
-        redirectTo = 'market://details?id=com.gogobag.android';
-      } 
-      else if (isMacOS) {
-        // 3. macOS (включая Safari и Chrome) → веб-версия App Store
-        redirectTo = appStoreLink;
-      } 
-      else {
-        // 4. Всё остальное (Windows, Linux, старые браузеры и т.д.) → веб-версия Play Store
-        redirectTo = playStoreLink;
-      }
-
-      // Редирект (с небольшой задержкой, чтобы пользователь успел увидеть лоадер)
-      setTimeout(() => {
-        window.location.href = redirectTo;
-      }, 800);
+      // Два способа — один точно сработает мгновенно
+      document.querySelector('meta[http-equiv="refresh"]').setAttribute('content', '0;url='+url);
+      location.replace(url); // самый быстрый и не оставляет записи в истории
     })();
   </script>
-
-  <!-- На случай, если JS отключён -->
-  <noscript>
-    <p>Включите JavaScript или выберите магазин вручную:</p>
-    <p>
-      <a href="https://apps.apple.com/us/app/gogobag-%D0%B4%D0%BE%D1%81%D1%82%D0%B0%D0%B2%D0%BA%D0%B0-%D0%BF%D0%BE%D0%BF%D1%83%D1%82%D0%BD%D0%B8%D0%BA%D0%B0%D0%BC%D0%B8/id6740579444">Открыть в App Store</a><br><br>
-      <a href="https://play.google.com/store/apps/details?id=com.gogobag.android&pcampaignid=web_share">Открыть в Google Play</a>
-    </p>
-  </noscript>
-</body>
+</head>
+<body></body>
 </html>
